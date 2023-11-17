@@ -1,0 +1,49 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Answer {
+  id: ID!
+  question: Question!
+  selector: [Selector!]!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createSurvey(title: String!): Survey!
+  deleteSurvey: Survey!
+  edit: Survey!
+}
+
+type Query {
+  healthCheck: Boolean!
+  survey: Survey!
+  surveys: [Survey!]!
+}
+
+type Question {
+  answers: [Answer!]!
+  hint: String!
+  id: ID!
+  selectors: [Selector!]!
+  survey: Survey!
+  title: String!
+}
+
+type Selector {
+  answer: Answer!
+  id: ID!
+  select: Int!
+}
+
+type Survey {
+  createdAt: DateTime!
+  id: ID!
+  questions: [Question!]!
+  title: String!
+  updatedAt: DateTime!
+}
