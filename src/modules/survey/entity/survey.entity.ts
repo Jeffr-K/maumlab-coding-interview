@@ -10,7 +10,7 @@ export class Survey {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: false })
+  @Column({ unique: true })
   @Field(() => String)
   title: string;
 

@@ -18,11 +18,9 @@ export class Answer {
   @Column({ nullable: false })
   value: string;
 
-  // @Field(() => Question)
   @ManyToOne(() => Question, (question) => question.answers)
   question: Question;
 
-  // @Field(() => [Selector])
   @OneToMany(() => Selector, (selector) => selector.question)
   selector: Selector[];
 }
