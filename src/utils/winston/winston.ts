@@ -1,44 +1,58 @@
-import { utilities, WinstonModule } from 'nest-winston';
-import * as winstonDaily from 'winston-daily-rotate-file';
-import * as winston from 'winston';
-import { config } from "dotenv";
-config();
+import { join } from "path";
+import * as winston from "winston";
+import * as winstonDaily from "winston-daily-rotate-file";
 
-const env = process.env.NODE_ENV;
+const { combine, timestamp, label, printf } = winston.format;
 
-const logDir = __dirname + '/../../logs';
+const folderPath = join(__dirname, '..', '..', '..', 'logs');
 
-const dailyOptions = (level: string) => {
-  return {
-    level,
-    datePattern: 'YYYY-MM-DD-HH-mm',
-    dirname: logDir + `/${level}`,
-    filename: `%DATE%.${level}.log`,
-    maxFiles: 60 * 24,
-    zippedArchive: true,
-  };
-};
+const formatter = printf(({ level, message, label, timestamp }) => {
+  return `${timestamp} [${label}] ${level}: ${message}`;
+});
 
-export const customWinstonLogger = WinstonModule.createLogger({
+export const logger = winston.createLogger({
+  format: combine(
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    label({ label: 'MaumLabs Coding Interview' }),
+    formatter,
+  ),
   transports: [
-    new winston.transports.Console({
-      level: env === 'production' ? 'http' : 'silly',
-      format:
-        env === 'production'
-          ? winston.format.simple()
-          : winston.format.combine(
-            winston.format.timestamp({}),
-            utilities.format.nestLike('MaumLabs', {
-              prettyPrint: true,
-              colors: true
-            }),
-          ),
+    new winstonDaily({
+      level: 'info',
+      datePattern: 'YYYY-MM-DD',
+      dirname: folderPath + '/info',
+      filename: `%DATE%.log`,
+      maxFiles: 30,
+      zippedArchive: true,
     }),
-    new winstonDaily(dailyOptions('info')),
-    new winstonDaily(dailyOptions('warn')),
-    new winstonDaily(dailyOptions('error')),
-    new winston.transports.File(dailyOptions('info')),
-    new winston.transports.File(dailyOptions('warn')),
-    new winston.transports.File(dailyOptions('error')),
+    new winstonDaily({
+      level: 'error',
+      datePattern: 'YYYY-MM-DD',
+      dirname: folderPath + '/error',
+      filename: `%DATE%.error.log`,
+      maxFiles: 30,
+      zippedArchive: true,
+    }),
+  ],
+  exceptionHandlers: [
+    new winstonDaily({
+      level: 'error',
+      datePattern: 'YYYY-MM-DD',
+      dirname: folderPath + '/exception',
+      filename: `%DATE%.exception.log`,
+      maxFiles: 30,
+      zippedArchive: true,
+    }),
   ],
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple(),
+      ),
+    }),
+  );
+}

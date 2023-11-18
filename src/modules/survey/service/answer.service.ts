@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Answer } from "../entity/answer.entity";
@@ -25,6 +25,9 @@ export class AnswerService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
 
       const question = await this.questionRepository.findOne({
         where: {
@@ -33,6 +36,9 @@ export class AnswerService {
         },
         relations: ['survey']
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
 
       await Promise.all(
         data.input.map(async(answer: AnswerRequest) => {
@@ -46,7 +52,6 @@ export class AnswerService {
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
@@ -60,15 +65,20 @@ export class AnswerService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
       const question = await this.questionRepository.findOne({
         where: { id: data.questionId }
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
 
       await this.answerRepository.delete({ id: data.answerId });
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
@@ -83,10 +93,16 @@ export class AnswerService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
 
       const question = await this.questionRepository.findOne({
         where: { id: data.questionId }, relations: ['survey']
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
 
       await this.answerRepository.update(data.answerId, {
         nums: data.input.nums,
@@ -96,7 +112,6 @@ export class AnswerService {
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
@@ -107,11 +122,24 @@ export class AnswerService {
     answerId: number
   }) {
     try {
+      const survey = await this.surveyRepository.findOne({
+        where: { id: data.surveyId }
+      });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
+
+      const question = await this.questionRepository.findOne({
+        where: { id: data.questionId }, relations: ['survey']
+      });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
+
       return await this.answerRepository.findOne({
         where: { id: data.answerId }
       });
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
@@ -124,20 +152,27 @@ export class AnswerService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
 
       const question = await this.questionRepository.findOne({
         where: { id: data.questionId, survey: survey }
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
 
-      return await this.answerRepository.find({
-        where: { question: question },
-        relations: [
-          "question",
-          "survey"
-        ]
+      const result =  await this.answerRepository.find({
+        where: { question: { id: question.id } },
+        relations: ["question", "survey"]
       });
+      if (result.length === 0) {
+        throw new NotFoundException("설문지에 조회가능 한 보기 항목이 없습니다.");
+      }
+
+      return result;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }

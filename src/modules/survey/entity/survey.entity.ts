@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Question } from './question.entity';
 import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { Completed } from "./completed";
 
 @Entity()
 @ObjectType()
@@ -9,9 +10,17 @@ export class Survey {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: false })
   @Field(() => String)
   title: string;
+
+  @Column({
+    type: 'enum',
+    name: 'completed',
+    enum: Completed,
+    default: Completed.FALSE
+  })
+  completed: Completed;
 
   @Column()
   @Field(() => String)

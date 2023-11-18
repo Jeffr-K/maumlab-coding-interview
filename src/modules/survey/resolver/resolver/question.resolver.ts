@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Inject } from "@nestjs/common";
+import { HttpStatus, Inject } from "@nestjs/common";
 import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Question } from "../../entity/question.entity";
 import { CreateQuestionInput } from "../input/question.create-input";
@@ -9,6 +9,7 @@ import {
   QuestionQueriesResponse,
   QuestionQueryResponse
 } from "../response/question.response";
+import { Information } from "../../../../utils/logger/information.decorator";
 
 @Resolver(of => Question)
 export class QuestionResolver {
@@ -16,8 +17,8 @@ export class QuestionResolver {
     @Inject(QuestionService) private questionService: QuestionService
   ) {}
 
-  // OK
   @Query((returns) => QuestionQueryResponse)
+  @Information("설문지 문제 항목을 조회합니다.")
   async getQuestion(
     @Args('surveyId', { name: 'surveyId', type: () => Int }) surveyId: number,
     @Args('questionId', { name: 'questionId', type: () => Int }) questionId: number,
@@ -28,30 +29,37 @@ export class QuestionResolver {
         questionId: questionId
       });
 
-      return new QuestionQueryResponse(HttpStatus.OK, '성공', result);
+      return new QuestionQueryResponse(
+        HttpStatus.OK,
+        '설문지 문제 항목을 조회하였습니다.',
+        result
+      );
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-
-  // OK
   @Query((returns) => QuestionQueriesResponse)
+  @Information("설문지 문제 항목 목록을 조회합니다.")
   async getQuestions(
     @Args({ name: 'surveyId', type: () => Int }) surveyId: number,
   ) {
     try {
-      const result = await this.questionService.getQuestions({});
-      return new QuestionQueriesResponse(HttpStatus.OK, '성공', result);
+      const result = await this.questionService.getQuestions({
+        surveyId: surveyId
+      });
+      return new QuestionQueriesResponse(
+        HttpStatus.OK,
+        '설문지 문제 항목 목록을 조회하였습니다.',
+        result
+      );
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // OK
   @Mutation((returns) => QuestionMutationResponse)
+  @Information("설문지 문제 항목을 생성합니다.")
   async createQuestion(
     @Args('surveyId', { type: () => Int }) id: number,
     @Args() question: CreateQuestionInput
@@ -62,15 +70,18 @@ export class QuestionResolver {
         question: question
       });
 
-      return new QuestionMutationResponse(HttpStatus.OK, '성공', result);
+      return new QuestionMutationResponse(
+        HttpStatus.OK,
+        '설문지 문제 항목을 생성하였습니다.',
+        result
+      );
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // OK
   @Mutation((returns) => QuestionMutationResponse)
+  @Information("설문지 문제 항목을 삭제합니다.")
   async deleteQuestion(
     @Args({ name: 'surveyId', type: () => Int }) surveyId: number,
     @Args({ name: 'questionId', type: () => Int }) questionId: number,
@@ -81,15 +92,18 @@ export class QuestionResolver {
         questionId: questionId
       });
 
-      return new QuestionMutationResponse(HttpStatus.OK, '성공', result);
+      return new QuestionMutationResponse(
+        HttpStatus.OK,
+        '설문지 문제 항목을 삭제하였습니다.',
+        result
+      );
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // OK
   @Mutation((returns) => QuestionMutationResponse)
+  @Information("설문지 문제 항목을 수정합니다.")
   async editQuestion(
     @Args({ name: 'surveyId', type: () => Int }) surveyId: number,
     @Args({ name: 'questionId', type: () => Int }) questionId: number,
@@ -102,9 +116,12 @@ export class QuestionResolver {
         input: args
       });
 
-      return new QuestionMutationResponse(HttpStatus.OK, '성공', result);
+      return new QuestionMutationResponse(
+        HttpStatus.OK,
+        '설문지 문제 항목을 수정하였습니다.',
+        result
+      );
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
