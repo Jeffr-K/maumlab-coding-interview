@@ -49,3 +49,16 @@ DB_NAME=데이터베이스 이름<예: maum_db>
 ```bash
 $ yarn run start:dev
 ```
+
+4. GraphQL Playground 에 접속해주세요.
+
+루트 디렉토리 Docs 문서에 테스트 한 예제를 약간 문서화하였습니다.
+쿼리를 이용한 로그 저장은 Root Directory 에 /logs 파일에 저장됩니다.
+
+```text
+On Chrome:
+http://<서버호스트>:<포트>/graphql
+
+예) http://localhost:4000/graphql
+```
+

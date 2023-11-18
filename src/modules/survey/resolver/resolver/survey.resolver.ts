@@ -26,7 +26,11 @@ export class SurveyResolver {
       title: args.title,
       author: args.author
     });
-    return new SurveyMutationResponse(HttpStatus.OK, '성공', result);
+    return new SurveyMutationResponse(
+      HttpStatus.OK,
+      '성공',
+      result
+    );
 
   }
 
@@ -34,7 +38,11 @@ export class SurveyResolver {
   @Information("설문지를 삭제합니다.")
   async deleteSurvey(@Args('id', { type: () => Int }) id: number) {
     const result = await this.surveyService.deleteSurvey({ id: id });
-    return new SurveyMutationResponse(HttpStatus.OK, '성공', result);
+    return new SurveyMutationResponse(
+      HttpStatus.OK,
+      '삭제가 성공적으로 이루어졌습니다.',
+      result
+    );
   }
 
   @Mutation((returns) => SurveyMutationResponse)
@@ -47,7 +55,11 @@ export class SurveyResolver {
       id: id,
       input: args
     });
-    return new SurveyMutationResponse(HttpStatus.OK, '성공', result);
+    return new SurveyMutationResponse(
+      HttpStatus.OK,
+      '성공',
+      result
+    );
   }
 
   @Query((returns) => SurveyResponse)
@@ -55,7 +67,11 @@ export class SurveyResolver {
   async getSurvey(@Args('surveyId', { type: () => Int }) surveyId: number) {
     try {
       const result = await this.surveyService.getSurvey({ surveyId: surveyId });
-      return new SurveyResponse(HttpStatus.OK, '성공', result);
+      return new SurveyResponse(
+        HttpStatus.OK,
+        '성공',
+        result
+      );
     } catch (e) {
       throw e;
     }
@@ -66,7 +82,11 @@ export class SurveyResolver {
   async getSurveys() {
     try {
       const result = await this.surveyService.getSurveys();
-      return new SurveyQueriesResponse(HttpStatus.OK, '성공', result);
+      return new SurveyQueriesResponse(
+        HttpStatus.OK,
+        '성공',
+        result
+      );
     } catch (e) {
       throw e;
     }
@@ -82,7 +102,11 @@ export class SurveyResolver {
         surveyId: surveyId,
         completed: true
       });
-      return new SurveyMutationResponse(HttpStatus.OK, '설문지가 완료 처리 되었습니다.', result);
+      return new SurveyMutationResponse(
+        HttpStatus.OK,
+        '설문지가 완료 처리 되었습니다.',
+        result
+      );
     } catch (e) {
       throw e;
     }
@@ -92,7 +116,6 @@ export class SurveyResolver {
   @Information("완료된 설문지를 조회합니다.")
   async getSurveyCompleted() {
     const result =  await this.surveyService.getSurveyCompleted();
-    console.log("??", result);
     return new SurveyCompletedQueryResponse(
       HttpStatus.OK,
       "완료된 설문지를 조회하였습니다.",
