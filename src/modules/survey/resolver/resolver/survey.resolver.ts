@@ -4,7 +4,12 @@ import { Survey } from "../../entity/survey.entity";
 import { SurveyService } from "../../service/survey.service";
 import { CreateSurveyInput } from "../input/survey.create-input";
 import { UpdateSurveyInput } from "../input/survey.update-input";
-import { SurveyMutationResponse, SurveyQueriesResponse, SurveyResponse } from "../response/survey.response";
+import {
+  SurveyCompletedQueryResponse,
+  SurveyMutationResponse,
+  SurveyQueriesResponse,
+  SurveyResponse
+} from "../response/survey.response";
 import { Information } from "../../../../utils/logger/information.decorator";
 
 
@@ -83,11 +88,17 @@ export class SurveyResolver {
     }
   }
 
-  @Query((returns) => SurveyQueriesResponse)
+  @Query((returns) => SurveyCompletedQueryResponse)
   @Information("완료된 설문지를 조회합니다.")
   async getSurveyCompleted() {
     const result =  await this.surveyService.getSurveyCompleted();
-    return new SurveyQueriesResponse(HttpStatus.OK, "성공", result);
+    console.log("??", result);
+    return new SurveyCompletedQueryResponse(
+      HttpStatus.OK,
+      "완료된 설문지를 조회하였습니다.",
+      result.totalPoint,
+      result.survey
+    );
   }
 
 }

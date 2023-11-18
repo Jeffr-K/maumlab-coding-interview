@@ -77,8 +77,13 @@ export class SelectorService {
         throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
       }
 
+      const selected = await this.selectorRepository.findOne({ where: { id: data.selectorId }});
+      if (!selected) {
+        throw new NotFoundException("삭제할 선택한 보기 항목이 없습니다.");
+      }
+
       await this.selectorRepository.delete({
-        id: data.selectorId,
+        id: selected.id,
         answer: { id: answer.id },
         question: { id: question.id }
       });
@@ -115,7 +120,7 @@ export class SelectorService {
       }
 
       const answer = await this.answerRepository.findOne({
-        where: { id: data.answerId, question: question }
+        where: { id: data.answerId }
       });
       if (!answer) {
         throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
@@ -159,9 +164,14 @@ export class SelectorService {
         throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
       }
 
+      const selected = await this.selectorRepository.findOne({ where: { id: data.selectorId }});
+      if (!selected) {
+        throw new NotFoundException("선택한 보기 항목이 존재하지 않습니다.")
+      }
+
       return await this.selectorRepository.findOne({
         where: {
-          id: data.selectorId,
+          id: selected.id,
           answer: { id: answer.id },
           question: { id: question.id }
         },

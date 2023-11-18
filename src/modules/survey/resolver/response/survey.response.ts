@@ -33,3 +33,18 @@ export class SurveyQueriesResponse extends ResponseBaseModel {
     this.data = data;
   }
 }
+
+@ObjectType()
+export class SurveyCompletedQueryResponse extends ResponseBaseModel {
+  @Field(() => Int)
+  totalPoint: number;
+
+  @Field(() => [Survey])
+  data: Survey[];
+
+  constructor(code: number, message: string, totalPoint: number, data: Survey[]) {
+    super(code, message);
+    this.data = data;
+    this.totalPoint = totalPoint;
+  }
+}

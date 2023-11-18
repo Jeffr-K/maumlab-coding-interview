@@ -38,7 +38,7 @@ export class SelectorResolver {
     @Args('questionId', { type: () => Int }) questionId: number,
     @Args('answerId', { type: () => Int }) answerId: number,
     @Args('selectorId', { type: () => Int }) selectorId: number,
-    @Args('selected', { type: () => Int }) selected: number
+    @Args('selected', { type: () => Boolean }) selected: number
   ) {
     const result = await this.selectorService.editSelect({
       surveyId: surveyId,

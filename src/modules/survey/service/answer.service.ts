@@ -107,7 +107,7 @@ export class AnswerService {
       await this.answerRepository.update(data.answerId, {
         nums: data.input.nums,
         value: data.input.value,
-        question: question.survey
+        question: { id: question.id }
       });
 
       return true;
@@ -130,15 +130,20 @@ export class AnswerService {
       }
 
       const question = await this.questionRepository.findOne({
-        where: { id: data.questionId }, relations: ['survey']
+        where: { id: data.questionId }
       });
       if (!question) {
         throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
       }
 
-      return await this.answerRepository.findOne({
+      const result = await this.answerRepository.findOne({
         where: { id: data.answerId }
       });
+      if (!result) {
+        throw new NotFoundException("입력값이 잘못되었거나 조회하고자 하는 데이터가 없습니다.");
+      }
+
+      return result;
     } catch (e) {
       throw e;
     }
@@ -157,7 +162,7 @@ export class AnswerService {
       }
 
       const question = await this.questionRepository.findOne({
-        where: { id: data.questionId, survey: survey }
+        where: { id: data.questionId }
       });
       if (!question) {
         throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
@@ -165,7 +170,7 @@ export class AnswerService {
 
       const result =  await this.answerRepository.find({
         where: { question: { id: question.id } },
-        relations: ["question", "survey"]
+        relations: ["question"]
       });
       if (result.length === 0) {
         throw new NotFoundException("설문지에 조회가능 한 보기 항목이 없습니다.");

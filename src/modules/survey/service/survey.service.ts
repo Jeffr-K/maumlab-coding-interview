@@ -134,14 +134,21 @@ export class SurveyService {
     }
   }
 
-  async getSurveyCompleted(): Promise<Survey[]> {
+  async getSurveyCompleted(): Promise<{ survey: Survey[], totalPoint: number }> {
     try {
       const surveys = await this.surveyRepository.find({
         where: { completed: Completed.TRUE },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
+        relations: ['questions']
       });
 
-      return surveys;
+      const totalPoint = surveys.reduce((acc, survey) => {
+        return acc + survey.questions.reduce((sum, curr) => {
+          return sum + curr.point;
+        }, 0);
+      }, 0);
+
+      return { survey: surveys, totalPoint: totalPoint };
     } catch (e) {
       throw e;
     }
