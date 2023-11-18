@@ -12,10 +12,10 @@ import { Selector } from "./entity/selector.entity";
 import { AnswerResolver } from "./resolver/resolver/answer.resolver";
 import { AnswerService } from "./service/answer.service";
 import { SelectorResolver } from "./resolver/resolver/selector.resolver";
-import { WinstonLogger } from "nest-winston";
+import { WinstonCustomModule } from "../../utils/winston/winston.custom.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Survey, Question, Answer, Selector])],
+  imports: [WinstonCustomModule, TypeOrmModule.forFeature([Survey, Question, Answer, Selector])],
   providers: [
     SurveyResolver,
     QuestionResolver,

@@ -26,13 +26,6 @@ export class Selector {
   @Field(() => Int)
   point: number;
 
-  @ManyToOne(() => Question, (question) => question.selectors)
-  question: Question;
-
-  @Field(() => Answer)
-  @ManyToOne(() => Answer, (answer) => answer.selector)
-  answer: Answer;
-
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   @Field(() => Date, { nullable: true })
   createdAt: Date;
@@ -40,4 +33,10 @@ export class Selector {
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   @Field(() => Date, { nullable: true })
   updatedAt: Date;
+
+  @ManyToOne(() => Question, (question) => question.selectors)
+  question: Question;
+
+  @ManyToOne(() => Answer, (answer) => answer.selector)
+  answer: Answer;
 }

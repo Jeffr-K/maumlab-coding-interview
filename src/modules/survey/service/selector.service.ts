@@ -1,10 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Selector } from "../entity/selector.entity";
 import { Repository } from "typeorm";
 import { Question } from "../entity/question.entity";
 import { Answer } from "../entity/answer.entity";
 import { Survey } from "../entity/survey.entity";
+import { Checked } from "../entity/checked";
 
 @Injectable()
 export class SelectorService {
@@ -38,15 +39,16 @@ export class SelectorService {
       selector.point = question.point;
 
       await this.selectorRepository.save(selector);
+      await this.questionRepository.update(question.id, {
+        checked: Checked.TRUE
+      });
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // ok
   async deleteSelect(data: {
     surveyId: number,
     answerId: number,
@@ -55,27 +57,41 @@ export class SelectorService {
   }): Promise<boolean> {
     try {
       const survey = await this.surveyRepository.findOne({
-        where: { id: data.surveyId }
+        where: { id: data.surveyId },
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
+
       const question = await this.questionRepository.findOne({
-        where: { id: data.questionId }
+        where: { id: data.questionId },
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
+
       const answer = await this.answerRepository.findOne({
-        where: { id: data.answerId }
+        where: { id: data.answerId, question: question }
       });
+      if (!answer) {
+        throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
+      }
 
       await this.selectorRepository.delete({
-        id: data.selectorId
+        id: data.selectorId,
+        answer: { id: answer.id },
+        question: { id: question.id }
+      });
+      await this.questionRepository.update(question.id, {
+        checked: Checked.FALSE
       });
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // ok
   async editSelect(data: {
     surveyId: number,
     questionId: number,
@@ -87,14 +103,23 @@ export class SelectorService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId },
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
 
       const question = await this.questionRepository.findOne({
         where: { id: data.questionId },
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
 
       const answer = await this.answerRepository.findOne({
         where: { id: data.answerId, question: question }
-      }).catch(e => new Error("ddd"));
+      });
+      if (!answer) {
+        throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
+      }
 
       await this.selectorRepository.update(data.selectorId, {
         selected: data.selected
@@ -102,12 +127,10 @@ export class SelectorService {
 
       return true;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // ok
   async getSelect(data: {
     surveyId: number,
     questionId: number,
@@ -115,19 +138,39 @@ export class SelectorService {
     selectorId: number,
   }): Promise<Selector> {
     try {
-      const result = await this.selectorRepository.findOne({
-        where: { id: data.selectorId },
-        relations: ['answer']
+      const survey = await this.surveyRepository.findOne({
+        where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
 
-      return result;
+      const question = await this.questionRepository.findOne({
+        where: { id: data.questionId }
+      });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
+
+      const answer = await this.questionRepository.findOne({
+        where: { id: data.answerId }
+      });
+      if (!answer) {
+        throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
+      }
+
+      return await this.selectorRepository.findOne({
+        where: {
+          id: data.selectorId,
+          answer: { id: answer.id },
+          question: { id: question.id }
+        },
+      });
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
 
-  // TODO:
   async getSelects(data: {
     surveyId: number,
     questionId: number,
@@ -137,22 +180,37 @@ export class SelectorService {
       const survey = await this.surveyRepository.findOne({
         where: { id: data.surveyId }
       });
+      if (!survey) {
+        throw new NotFoundException("설문지를 찾을 수 없습니다.");
+      }
+
       const question = await this.questionRepository.findOne({
         where: { id: data.questionId }
       });
+      if (!question) {
+        throw new NotFoundException("문제 항목을 찾을 수 없습니다.");
+      }
+
       const answer = await this.questionRepository.findOne({
         where: { id: data.answerId }
       });
+      if (!answer) {
+        throw new NotFoundException("보기 항목을 찾을 수 없습니다.");
+      }
 
-      return await this.selectorRepository.find({
+      const result = await this.selectorRepository.find({
         where: {
-          question: question,
-          answer: answer
+          question: { id: question.id },
+          answer: { id: answer.id }
         },
         relations: ['answer']
       });
+      if (result.length === 0) {
+        throw new NotFoundException("설문지에 조회가능 한 선택된 항목이 없습니다.");
+      }
+
+      return result;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }
